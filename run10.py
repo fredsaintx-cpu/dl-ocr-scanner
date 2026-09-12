@@ -192,6 +192,20 @@ def ocr_classify(img_path):
 
 GOOGLE_VISION_API_KEY = "AIzaSyCTn98xx18aD-3urZP9mXf6IlJSnJL8TQ4"
 
+# Build SSL context once — uses certifi on Mac/Linux, system certs on Windows
+def _get_ssl_context():
+    try:
+        import ssl, certifi
+        return ssl.create_default_context(cafile=certifi.where())
+    except Exception:
+        try:
+            import ssl
+            return ssl.create_default_context()
+        except Exception:
+            return None
+
+_SSL_CTX = _get_ssl_context()
+
 def _call_vision_api(img_path):
     """
     Call Google Vision DOCUMENT_TEXT_DETECTION on img_path.
@@ -228,7 +242,7 @@ def _call_vision_api(img_path):
         # Call Vision API with retry on connection errors
         for attempt in range(3):
             try:
-                resp = json.loads(urllib.request.urlopen(req, timeout=90).read())
+                resp = json.loads(urllib.request.urlopen(req, timeout=90, context=_SSL_CTX).read())
                 break
             except Exception as _conn_e:
                 if attempt == 2:
@@ -513,7 +527,7 @@ def rotate_dl_card(img_path):
         body = json.dumps({"requests":[{"image":{"content":content},"features":[{"type":"DOCUMENT_TEXT_DETECTION"}]}]}).encode()
         url = f"https://vision.googleapis.com/v1/images:annotate?key={GOOGLE_VISION_API_KEY}"
         request = _req.Request(url, data=body, headers={"Content-Type":"application/json"})
-        resp = json.loads(_req.urlopen(request, timeout=30).read())
+        resp = json.loads(_req.urlopen(request, timeout=30, context=_SSL_CTX).read())
         fta = resp["responses"][0].get("fullTextAnnotation")
         if fta:
             import math
