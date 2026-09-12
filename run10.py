@@ -1,6 +1,13 @@
 #!/usr/bin/env python3
 """Mindee DL OCR - Rich UI Edition - Orange/Gold Theme"""
 import os, re, shutil, sys, time, math, json
+
+# Fix Mac SSL certificate verification issues
+try:
+    import certifi, ssl
+    os.environ.setdefault('SSL_CERT_FILE', certifi.where())
+    os.environ.setdefault('REQUESTS_CA_BUNDLE', certifi.where())
+except: pass
 from pathlib import Path
 from datetime import date, datetime
 from PIL import Image, ImageOps
