@@ -45,6 +45,32 @@ def _restore_stderr():
 
 API_KEY = "md_dshGxZqKwrS-lVQ0NTZvWCqzhAeBMCkfAfBrKmjjLi4"
 MODEL_ID = "32e4d5ea-d45d-4044-9363-e86888c1b297"
+
+# All available Mindee key pairs — rotated automatically on 402 errors
+MINDEE_KEY_POOL = [
+    ("md_dshGxZqKwrS-lVQ0NTZvWCqzhAeBMCkfAfBrKmjjLi4", "32e4d5ea-d45d-4044-9363-e86888c1b297"),
+    ("md__xJWTwW6egna_7FNxrcT0XBo49ZGi5kj4JZOkdyC38o", "8cae4cc0-68a8-4112-807e-623526f98cb7"),
+    ("md_c353Lw-ObL-Q6W9e3kYBxHC95caDByzdg1-5xhGPRRM", "695fd8c1-84ba-4b09-b877-c0b3883b3261"),
+    ("md_ohQRPe9bcng6iefXZj6EmUAGMlxxlp_oqF7Jard548I", "8e7ad030-067c-4fe0-aabc-3d3b043ae0a5"),
+    ("md_QW4S2lEwLKgoyCKJv5fWHOyrOYS1MiwQk6fCnH2E240", "de9096d4-9d88-4c0a-a61f-a857255bf437"),
+    ("md_qkTqNXqYya63OUiy9ApZ7PqExAB0YpWus1LE9kWZ7o4", "ec697320-b5f6-4c34-ab4e-c66b85c33463"),
+    ("md_ZgPn00sLCJ71XBxUZPZIf3t2R0Sp6GZcfBDtDn7lEA0", "6e193c4a-fc5f-442c-af48-5bfefd671954"),
+]
+_key_index = 0
+
+def _get_mindee_client():
+    """Return a Mindee client using the current active key."""
+    return Client(MINDEE_KEY_POOL[_key_index][0])
+
+def _get_mindee_model():
+    """Return the model ID for the current active key."""
+    return MINDEE_KEY_POOL[_key_index][1]
+
+def _rotate_mindee_key():
+    """Switch to the next available Mindee key on 402 errors."""
+    global _key_index
+    _key_index = (_key_index + 1) % len(MINDEE_KEY_POOL)
+    print(f"  [Key rotated to slot {_key_index + 1}/{len(MINDEE_KEY_POOL)}]")
 EXTS = {'.jpg', '.jpeg', '.png', '.bmp', '.webp'}
 
 # Load face detector once at startup
@@ -924,8 +950,6 @@ def start_processing(config):
                 mindee_log = {}
                 first = ''; last = ''; flds = None; state = None; expiry = ''; doc_id = ''
                 for attempt_img in all_imgs:
-                    # Convert/resize to JPEG before sending to Mindee
-                    # Mindee drops connections on large webp/png files
                     import tempfile, io as _io
                     _mindee_img = Image.open(str(attempt_img))
                     try: _mindee_img = ImageOps.exif_transpose(_mindee_img)
@@ -934,14 +958,20 @@ def start_processing(config):
                     _tmp = tempfile.NamedTemporaryFile(suffix='.jpg', delete=False)
                     _mindee_img.convert('RGB').save(_tmp.name, format='JPEG', quality=92)
                     _tmp.close()
-                    # Retry Mindee up to 3 times on connection errors
-                    for _attempt in range(3):
+                    # Retry with key rotation on 402
+                    for _attempt in range(len(MINDEE_KEY_POOL) * 2):
                         try:
-                            response = client.enqueue_and_get_result(ExtractionResponse, PathInput(_tmp.name), params)
+                            _client = _get_mindee_client()
+                            _params = ExtractionParameters(model_id=_get_mindee_model(), rag=None, raw_text=None, polygon=True, confidence=True)
+                            response = _client.enqueue_and_get_result(ExtractionResponse, PathInput(_tmp.name), _params)
                             break
                         except Exception as _me:
-                            if _attempt == 2: raise _me
-                            time.sleep(2 ** _attempt)
+                            if '402' in str(_me):
+                                _rotate_mindee_key()
+                            elif _attempt >= 2:
+                                raise _me
+                            else:
+                                time.sleep(2 ** min(_attempt, 3))
                     try: os.unlink(_tmp.name)
                     except: pass
                     flds = response.inference.result.fields
