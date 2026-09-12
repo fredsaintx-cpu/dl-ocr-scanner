@@ -43,8 +43,8 @@ def _restore_stderr():
         _os.dup2(_saved_stderr_fd, _old_stderr_fd)
     except: pass
 
-API_KEY = "md_ohQRPe9bcng6iefXZj6EmUAGMlxxlp_oqF7Jard548I"
-MODEL_ID = "8e7ad030-067c-4fe0-aabc-3d3b043ae0a5"
+API_KEY = "md_c353Lw-ObL-Q6W9e3kYBxHC95caDByzdg1-5xhGPRRM"
+MODEL_ID = "695fd8c1-84ba-4b09-b877-c0b3883b3261"
 EXTS = {'.jpg', '.jpeg', '.png', '.bmp', '.webp'}
 
 # Load face detector once at startup
