@@ -52,9 +52,6 @@ MINDEE_KEY_POOL = [
     ("md__xJWTwW6egna_7FNxrcT0XBo49ZGi5kj4JZOkdyC38o", "8cae4cc0-68a8-4112-807e-623526f98cb7"),
     ("md_c353Lw-ObL-Q6W9e3kYBxHC95caDByzdg1-5xhGPRRM", "695fd8c1-84ba-4b09-b877-c0b3883b3261"),
     ("md_ohQRPe9bcng6iefXZj6EmUAGMlxxlp_oqF7Jard548I", "8e7ad030-067c-4fe0-aabc-3d3b043ae0a5"),
-    ("md_QW4S2lEwLKgoyCKJv5fWHOyrOYS1MiwQk6fCnH2E240", "de9096d4-9d88-4c0a-a61f-a857255bf437"),
-    ("md_qkTqNXqYya63OUiy9ApZ7PqExAB0YpWus1LE9kWZ7o4", "ec697320-b5f6-4c34-ab4e-c66b85c33463"),
-    ("md_ZgPn00sLCJ71XBxUZPZIf3t2R0Sp6GZcfBDtDn7lEA0", "6e193c4a-fc5f-442c-af48-5bfefd671954"),
 ]
 _key_index = 0
 
