@@ -1103,7 +1103,13 @@ def start_processing(config):
                 if expired:
                     exp_dir = Path(root) / "expired"
                     exp_dir.mkdir(exist_ok=True)
-                    try: shutil.move(str(final_path), str(exp_dir / final_path.name))
+                    # Include original folder ID in expired name so source is traceable
+                    orig_id = fld.name if fld.name != final_path.name else ''
+                    if orig_id and orig_id not in final_path.name:
+                        exp_name = f"{orig_id} - {final_path.name}"
+                    else:
+                        exp_name = final_path.name
+                    try: shutil.move(str(final_path), str(exp_dir / exp_name))
                     except: pass
                     # Clean up any empty parent folder left behind (e.g. original SSN folder)
                     try:
