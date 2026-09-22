@@ -350,6 +350,12 @@ def _vision_classify(img_path):
             # Colorado / generic ID back
             "not a driver license", "not a drivers license",
             "identification purposes only", "previous type",
+            # Wisconsin back
+            "wisconsindmv.gov", "anatomical gift", "use permanent ink",
+            "upon my death", "organs, tissues",
+            # Generic state DMV website patterns = back
+            "dmv.ca.gov", "dmv.ny.gov", "dps.texas.gov", "dmv.org",
+            "see other side", "see reverse side",
             "for identification purposes",
         ]
 
